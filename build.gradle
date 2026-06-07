@@ -1,0 +1,33 @@
+plugins {
+    id 'war'
+}
+
+group = 'com.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    providedCompile 'javax.servlet:javax.servlet-api:4.0.1'
+    implementation 'javax.servlet.jsp.jstl:jstl-api:1.2'
+    implementation 'org.glassfish.web:javax.servlet.jsp.jstl:1.2.5'
+}
+
+def tomcatHome = '/usr/local/opt/tomcat@9/libexec'
+def appName    = 'my-app'
+
+// ./gradlew deploy でTomcatのwebappsにWARをコピー
+tasks.register('deploy', Copy) {
+    dependsOn war
+    from war.archiveFile
+    into "${tomcatHome}/webapps"
+    rename { "${appName}.war" }
+}
+
+// ./gradlew undeploy でWARとデプロイ済みディレクトリを削除
+tasks.register('undeploy', Delete) {
+    delete "${tomcatHome}/webapps/${appName}.war",
+           "${tomcatHome}/webapps/${appName}"
+}
